@@ -75,7 +75,7 @@ class Board {
             const ARRAY_ROW = [];
             x = 0;
             for (x; x < sizeX; x++) {
-                const HAS_MINE = MINE_ARRAY.includes(10 * y + x);
+                const HAS_MINE = MINE_ARRAY.includes(sizeX * y + x);
                 const TILE = newTile(x, y, HAS_MINE);
 
                 TABLE_ROW.append(TILE);
