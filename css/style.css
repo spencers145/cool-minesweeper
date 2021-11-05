@@ -44,6 +44,10 @@
     background-color: rgb(65, 65, 65);
 }
 
+.flagged {
+    background-color: rgb(255, 0, 0);
+}
+
 .board-row {
     line-height: 0;
 }

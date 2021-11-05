@@ -1,4 +1,7 @@
 window.onload = () => {
+    // so that right clicking works
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
     Minesweeper.wipeGame();
     Minesweeper.newGame(10, 10, 15);
 };
@@ -17,6 +20,8 @@ function newTile(x, y, hasMine) {
     TILE.attr("y", y);
     TILE.mine = hasMine ? new Mine(x, y) : undefined;
     TILE.clicked = (neighborMines) => {
+        if (TILE.hasClass(`flagged`)) return;
+
         TILE.addClass(`revealed`);
         if (TILE.mine) {
             TILE.addClass(`mine`);
@@ -49,7 +54,16 @@ function newTile(x, y, hasMine) {
                 TILE.addClass(`eight-mine`);
         }
     }
-    TILE.on("click", Minesweeper.sweep);
+    TILE.flagged = () => {
+        if (TILE.hasClass(`revealed`)) return;
+        if (TILE.hasClass(`flagged`)) {
+            TILE.removeClass(`flagged`);
+        } else {
+            TILE.addClass(`flagged`);
+        }
+    }
+    TILE.on("click", Minesweeper.handleClick);
+    TILE.on("mousedown", Minesweeper.handleMouseDown);
 
     return TILE;
 }
@@ -177,12 +191,27 @@ Minesweeper = {
         Minesweeper.board.generateTiles(sizeX, sizeY, mineCount);
     },
 
-    sweep(event) {
+    handleClick(event) {
         const TILE = Minesweeper.board.getTileByObject($(event.target));
-        const MINE = Minesweeper.board.sweepAtTile(TILE);
+        Minesweeper.sweep(TILE);
+    },
+
+    handleMouseDown(event) {
+        const TILE = Minesweeper.board.getTileByObject($(event.target));
+        if (event.which === 3) {
+            Minesweeper.flag(TILE);
+        }
+    },
+
+    sweep(tile) {
+        const MINE = Minesweeper.board.sweepAtTile(tile);
         if (MINE) {
             Minesweeper.hitMine(MINE);
         }
+    },
+
+    flag(tile) {
+        tile.flagged();
     },
 
     hitMine(mine) {
