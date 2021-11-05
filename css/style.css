@@ -8,6 +8,26 @@
     background-color: #AAA;
 }
 
+.mine {
+    background-color: #000;
+}
+
+.one-mine {
+    background-color: rgb(65, 82, 179);
+}
+
+.two-mine {
+    background-color: rgb(58, 201, 77);
+}
+
+.three-mine {
+    background-color: rgb(179, 65, 65);
+}
+
+.four-mine {
+    background-color: rgb(205, 230, 69);
+}
+
 .board-row {
     line-height: 0;
 }
