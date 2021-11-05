@@ -16,9 +16,38 @@ function newTile(x, y, hasMine) {
     TILE.attr("x", x);
     TILE.attr("y", y);
     TILE.mine = hasMine ? new Mine(x, y) : undefined;
-    TILE.clicked = () => {
+    TILE.clicked = (neighborMines) => {
         TILE.addClass(`revealed`);
-        if (TILE.mine) return TILE.mine;
+        if (TILE.mine) {
+            TILE.addClass(`mine`);
+            return TILE.mine;
+        }
+
+        switch (neighborMines) {
+            case 1:
+                TILE.addClass(`one-mine`);
+                break;
+            case 2:
+                TILE.addClass(`two-mine`);
+                break;
+            case 3:
+                TILE.addClass(`three-mine`);
+                break;
+            case 4:
+                TILE.addClass(`four-mine`);
+                break;
+            case 5:
+                TILE.addClass(`five-mine`);
+                break;
+            case 6:
+                TILE.addClass(`six-mine`);
+                break;
+            case 7:
+                TILE.addClass(`seven-mine`);
+                break;
+            case 8:
+                TILE.addClass(`eight-mine`);
+        }
     }
     TILE.on("click", Minesweeper.sweep);
 
@@ -85,10 +114,10 @@ class Board {
     }
 
     sweepAtTile(tile) {
-        let mine = tile.clicked();
+        const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
+        let mine = tile.clicked(NEIGHBOR_MINES);
         if (mine) return mine;
 
-        const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
         if (NEIGHBOR_MINES === 0) {
             this.continueSweep(tile);
         }
@@ -101,9 +130,9 @@ class Board {
             if (NEIGHBOR.hasClass("revealed")) continue;
             if (NEIGHBOR.mine) continue;
 
-            NEIGHBOR.clicked();
+            const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(NEIGHBOR);
+            NEIGHBOR.clicked(NEIGHBOR_MINES);
 
-            const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
             if (!NEIGHBOR_MINES) this.continueSweep(NEIGHBOR);
         }
     }
