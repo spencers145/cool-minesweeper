@@ -75,10 +75,11 @@ class Board {
     getTileAt(x, y) {
         const TILE = this.tiles[y][x];
         //throw new Error("tried to find a tile but there's no tile at this position: " + x + " " + y);
+        return TILE;
     }
 
     sweepAtPosition(tile) {
-        tile = this.tiles[tile.attr("y")][tile.attr("x")];
+        tile = this.getTileAt(tile.attr("x"),tile.attr("y"));
         let mine = tile.clicked();
         return mine;
     }
