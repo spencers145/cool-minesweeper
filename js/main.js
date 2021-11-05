@@ -73,9 +73,10 @@ class Board {
     }
 
     getTileAt(x, y) {
-        const TILE = this.tiles[y][x];
+        let tile = this.tiles[y];
+        tile = tile ? tile[x] : undefined;
         //throw new Error("tried to find a tile but there's no tile at this position: " + x + " " + y);
-        return TILE;
+        return tile;
     }
 
     getTileByObject(tile) {
@@ -83,9 +84,58 @@ class Board {
         return TILE;
     }
 
-    sweepAtPosition(tile) {
+    sweepAtTile(tile) {
         let mine = tile.clicked();
-        return mine;
+        if (mine) return mine;
+
+        const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
+        if (NEIGHBOR_MINES === 0) {
+            this.continueSweep(tile);
+        }
+    }
+
+    continueSweep(tile) {
+        const TILES = Minesweeper.board.getNeighbors(tile);
+        while (TILES.length > 0) {
+            const NEIGHBOR = TILES.pop();
+            if (NEIGHBOR.hasClass("revealed")) continue;
+            if (NEIGHBOR.mine) continue;
+
+            NEIGHBOR.clicked();
+
+            const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
+            if (!NEIGHBOR_MINES) this.continueSweep(NEIGHBOR);
+        }
+    }
+    
+    getNeighbors(tile) {
+        const X = Number(tile.attr("x"));
+        const Y = Number(tile.attr("y"));
+
+        let tiles = [];
+        tiles.push(this.getTileAt(X + 1, Y + 1));
+        tiles.push(this.getTileAt(X, Y + 1));
+        tiles.push(this.getTileAt(X - 1, Y + 1));
+        tiles.push(this.getTileAt(X + 1, Y));
+        tiles.push(this.getTileAt(X - 1, Y));
+        tiles.push(this.getTileAt(X + 1, Y - 1));
+        tiles.push(this.getTileAt(X, Y - 1));
+        tiles.push(this.getTileAt(X - 1, Y - 1));
+
+        return tiles.filter((neighbor) => { return neighbor });
+    }
+
+    countNeighboringMines(tile) {
+        const NEIGHBORS = this.getNeighbors(tile);
+        return this.countMinesInTileList(NEIGHBORS);
+    }
+
+    countMinesInTileList(tiles) {
+        let mines = 0;
+        $.each(tiles, (_index, tile) => {
+            if (tile.mine) mines += 1;
+        });
+        return mines;
     }
 }
 
@@ -100,7 +150,7 @@ Minesweeper = {
 
     sweep(event) {
         const TILE = Minesweeper.board.getTileByObject($(event.target));
-        const MINE = Minesweeper.board.sweepAtPosition(TILE);
+        const MINE = Minesweeper.board.sweepAtTile(TILE);
         if (MINE) {
             Minesweeper.hitMine(MINE);
         }
