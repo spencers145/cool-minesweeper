@@ -1,51 +1,9 @@
 .tile {
-    width: 40px;
-    height: 40px;
-    background-color: #CCC;
-}
-
-.revealed {
-    background-color: #AAA;
-}
-
-.mine {
-    background-color: rgb(36, 36, 36);
-}
-
-.one-mine {
-    background-color: rgb(65, 82, 179);
-}
-
-.two-mine {
-    background-color: rgb(58, 201, 77);
-}
-
-.three-mine {
-    background-color: rgb(179, 65, 65);
-}
-
-.four-mine {
-    background-color: rgb(17, 27, 114);
-}
-
-.five-mine {
-    background-color: rgb(78, 0, 0);
-}
-
-.six-mine {
-    background-color: rgb(0, 104, 122);
-}
-
-.seven-mine {
-    background-color: rgb(0, 0, 0);
-}
-
-.eight-mine {
-    background-color: rgb(65, 65, 65);
-}
-
-.flagged {
-    background-color: rgb(255, 0, 0);
+    width: 32px;
+    height: 32px;
+    background-image: url("../img/minesprites.png");
+    background-position: -32px -1792px;
+    border: none;
 }
 
 .board-row {

@@ -1,9 +1,13 @@
 window.onload = () => {
     // so that right clicking works
     document.addEventListener('contextmenu', event => event.preventDefault());
+    window.addEventListener(`mouseup`, () => {
+        const TILE = Minesweeper.board.getTileByObject($(`button.faking`));
+        if (TILE) TILE.fakePressEnd();
+    });
 
     Minesweeper.wipeGame();
-    Minesweeper.newGame(10, 10, 15);
+    Minesweeper.newGame(40, 25, 100);
 };
 
 class Mine {
@@ -25,45 +29,40 @@ function newTile(x, y, hasMine) {
         TILE.addClass(`revealed`);
         if (TILE.mine) {
             TILE.addClass(`mine`);
+            TILE.css("background-position", `-96px -1792px`);
             return TILE.mine;
         }
 
-        switch (neighborMines) {
-            case 1:
-                TILE.addClass(`one-mine`);
-                break;
-            case 2:
-                TILE.addClass(`two-mine`);
-                break;
-            case 3:
-                TILE.addClass(`three-mine`);
-                break;
-            case 4:
-                TILE.addClass(`four-mine`);
-                break;
-            case 5:
-                TILE.addClass(`five-mine`);
-                break;
-            case 6:
-                TILE.addClass(`six-mine`);
-                break;
-            case 7:
-                TILE.addClass(`seven-mine`);
-                break;
-            case 8:
-                TILE.addClass(`eight-mine`);
-        }
+        TILE.css("background-position", `0 ${neighborMines * 32 - 1792}px`);
     }
     TILE.flagged = () => {
         if (TILE.hasClass(`revealed`)) return;
         if (TILE.hasClass(`flagged`)) {
             TILE.removeClass(`flagged`);
+            TILE.css("background-position", `-32px -1792px`);
         } else {
             TILE.addClass(`flagged`);
+            TILE.css("background-position", `-32px -1760px`);
         }
+    }
+    TILE.fakePressStart = () => {
+        if (TILE.hasClass(`revealed`) || TILE.hasClass(`flagged`)) return;
+        TILE.addClass(`faking`);
+        TILE.css("background-position", "0 -1792px");
+    }
+    TILE.fakePressFakeEnd = () => {
+        if (TILE.hasClass(`revealed`) || TILE.hasClass(`flagged`)) return;
+        TILE.css("background-position", "-32px -1792px");
+    }
+    TILE.fakePressEnd = () => {
+        if (TILE.hasClass(`revealed`) || TILE.hasClass(`flagged`)) return;
+        TILE.removeClass(`faking`);
+        TILE.css("background-position", "-32px -1792px");
     }
     TILE.on("click", Minesweeper.handleClick);
     TILE.on("mousedown", Minesweeper.handleMouseDown);
+    TILE.on("mouseleave", Minesweeper.handleMouseLeave);
+    TILE.on("mouseenter", Minesweeper.handleMouseEnter);
 
     return TILE;
 }
@@ -200,6 +199,22 @@ Minesweeper = {
         const TILE = Minesweeper.board.getTileByObject($(event.target));
         if (event.which === 3) {
             Minesweeper.flag(TILE);
+        } else if (event.which === 1) {
+            TILE.fakePressStart();
+        }
+    },
+
+    handleMouseLeave(event) {
+        const TILE = Minesweeper.board.getTileByObject($(event.target));
+        if (TILE.hasClass(`faking`)) {
+            TILE.fakePressFakeEnd();
+        }
+    },
+
+    handleMouseEnter(event) {
+        const TILE = Minesweeper.board.getTileByObject($(event.target));
+        if (TILE.hasClass(`faking`)) {
+            TILE.fakePressStart();
         }
     },
 
@@ -221,7 +236,6 @@ Minesweeper = {
     },
 
     gameOver() {
-        alert("you suck");
     }
 };
 
