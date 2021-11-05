@@ -78,8 +78,12 @@ class Board {
         return TILE;
     }
 
+    getTileByObject(tile) {
+        const TILE = this.getTileAt(tile.attr("x"), tile.attr("y"));
+        return TILE;
+    }
+
     sweepAtPosition(tile) {
-        tile = this.getTileAt(tile.attr("x"),tile.attr("y"));
         let mine = tile.clicked();
         return mine;
     }
@@ -95,7 +99,7 @@ Minesweeper = {
     },
 
     sweep(event) {
-        const TILE = $(event.target);
+        const TILE = Minesweeper.board.getTileByObject($(event.target));
         const MINE = Minesweeper.board.sweepAtPosition(TILE);
         if (MINE) {
             Minesweeper.hitMine(MINE);
