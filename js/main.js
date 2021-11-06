@@ -297,7 +297,7 @@ Minesweeper = {
     },
 
     chord(tile) {
-        if (!tile.hasClass(`revealed`)) return;
+        if (!tile.hasClass(`revealed`) || tile.hasClass(`mine`)) return;
 
         const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
         const FLAGGED_NEIGHBORS = Minesweeper.board.countNeighboringFlags(tile);
