@@ -1,14 +1,31 @@
 window.onload = () => {
     // so that right clicking works
     document.addEventListener('contextmenu', event => event.preventDefault());
-    window.addEventListener(`mouseup`, () => {
-        const TILE = Minesweeper.board.getTileByObject($(`button.faking`));
-        if (TILE) TILE.fakePressEnd();
+    document.mice = [];
+    window.addEventListener(`mouseup`, (event) => {
+        updateMouseUp(event);
+        if (event.button === 0) {
+            $.each($(`button.faking`), (_index, button) => {
+                const TILE = Minesweeper.board.getTileByObject($(button));
+                if (TILE) TILE.fakePressEnd();
+            });
+        }
+    });
+    window.addEventListener(`mousedown`, (event) => {
+        updateMouseDown(event);
     });
 
     Minesweeper.wipeGame();
     Minesweeper.newGame(40, 25, 100);
 };
+
+function updateMouseUp(event) {
+    document.mice[event.button] = 0;
+}
+
+function updateMouseDown(event) {
+    document.mice[event.button] = 1;
+}
 
 class Mine {
     constructor(x, y) {
@@ -45,6 +62,22 @@ function newTile(x, y, hasMine) {
             TILE.css("background-position", `-32px -1760px`);
         }
     }
+    TILE.fakeChordStart = () => {
+        TILE.addClass(`chording`);
+        TILE.fakePressStart();
+        const NEIGHBORS = Minesweeper.board.getNeighbors(TILE);        
+        $.each(NEIGHBORS, (_index, neighbor) => {
+            neighbor.fakePressStart();
+        });
+    }
+    TILE.fakeChordEnd = () => {
+        TILE.removeClass(`chording`);
+        TILE.fakePressEnd();
+        const NEIGHBORS = Minesweeper.board.getNeighbors(TILE);        
+        $.each(NEIGHBORS, (_index, neighbor) => {
+            neighbor.fakePressEnd();
+        });
+    }
     TILE.fakePressStart = () => {
         if (TILE.hasClass(`revealed`) || TILE.hasClass(`flagged`)) return;
         TILE.addClass(`faking`);
@@ -61,6 +94,7 @@ function newTile(x, y, hasMine) {
     }
     TILE.on("click", Minesweeper.handleClick);
     TILE.on("mousedown", Minesweeper.handleMouseDown);
+    TILE.on("mouseup", Minesweeper.handleMouseUp);
     TILE.on("mouseleave", Minesweeper.handleMouseLeave);
     TILE.on("mouseenter", Minesweeper.handleMouseEnter);
 
@@ -127,6 +161,8 @@ class Board {
     }
 
     sweepAtTile(tile) {
+        if (tile.hasClass(`flagged`)) return;
+
         const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
         let mine = tile.clicked(NEIGHBOR_MINES);
         if (mine) return mine;
@@ -179,6 +215,19 @@ class Board {
         });
         return mines;
     }
+
+    countNeighboringFlags(tile) {
+        const NEIGHBORS = this.getNeighbors(tile);
+        return this.countFlagsInTileList(NEIGHBORS);
+    }
+
+    countFlagsInTileList(tiles) {
+        let flags = 0;
+        $.each(tiles, (_index, tile) => {
+            if (tile.hasClass(`flagged`)) flags += 1;
+        });
+        return flags;
+    }
 }
 
 Minesweeper = {
@@ -191,21 +240,46 @@ Minesweeper = {
     },
 
     handleClick(event) {
+        updateMouseUp(event);
+        if (event.button !== 0) return;
+
         const TILE = Minesweeper.board.getTileByObject($(event.target));
-        Minesweeper.sweep(TILE);
+        if (document.mice[2]) {
+            Minesweeper.chord(TILE);
+        } else {
+            Minesweeper.sweep(TILE);
+        }
     },
 
     handleMouseDown(event) {
+        updateMouseDown(event);
+
         const TILE = Minesweeper.board.getTileByObject($(event.target));
-        if (event.which === 3) {
+
+        if (document.mice[0] && document.mice[2]) {
+            TILE.fakeChordStart();
+        } else if (document.mice[2]) {
             Minesweeper.flag(TILE);
-        } else if (event.which === 1) {
+        } else if (document.mice[0]) {
             TILE.fakePressStart();
+        }
+    },
+
+    handleMouseUp(event) {
+        updateMouseUp(event);
+
+        const TILE = Minesweeper.board.getTileByObject($(event.target));
+
+        if (document.mice[0]) {
+            TILE.fakeChordEnd();
         }
     },
 
     handleMouseLeave(event) {
         const TILE = Minesweeper.board.getTileByObject($(event.target));
+        if (TILE.hasClass(`chording`)) {
+            TILE.fakeChordEnd();
+        }
         if (TILE.hasClass(`faking`)) {
             TILE.fakePressFakeEnd();
         }
@@ -215,6 +289,24 @@ Minesweeper = {
         const TILE = Minesweeper.board.getTileByObject($(event.target));
         if (TILE.hasClass(`faking`)) {
             TILE.fakePressStart();
+        } else {
+            if (document.mice[0] && document.mice[2]) {
+                TILE.fakeChordStart();
+            }
+        }
+    },
+
+    chord(tile) {
+        if (!tile.hasClass(`revealed`)) return;
+
+        const NEIGHBOR_MINES = Minesweeper.board.countNeighboringMines(tile);
+        const FLAGGED_NEIGHBORS = Minesweeper.board.countNeighboringFlags(tile);
+
+        if (NEIGHBOR_MINES === FLAGGED_NEIGHBORS) {
+            const NEIGHBORS = Minesweeper.board.getNeighbors(tile);
+            $.each(NEIGHBORS, (_index, neighbor) => {
+                Minesweeper.sweep(neighbor);
+            });
         }
     },
 
