@@ -140,7 +140,7 @@ class Board {
         }
 
         const MINE_ARRAY = [];
-        while (MINE_ARRAY.length < mineCount - 1) {
+        while (MINE_ARRAY.length < mineCount) {
             const RANDOM = Math.floor(Math.random() * indices.length);
             MINE_ARRAY.push(indices[RANDOM]);
             indices.splice(RANDOM, 1);
