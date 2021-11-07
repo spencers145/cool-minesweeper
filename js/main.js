@@ -16,7 +16,7 @@ window.onload = () => {
     });
 
     Minesweeper.wipeGame();
-    Minesweeper.newGame(40, 25, 100);
+    Minesweeper.newGame(35, 150, 300);
 };
 
 function updateMouseUp(event) {
@@ -228,15 +228,25 @@ class Board {
         });
         return flags;
     }
+
+    countAllMines() {
+        let mines = 0;
+        $.each(this.tiles, (_index, row) => {
+            mines += this.countMinesInTileList(row);
+        });
+        return mines;
+    }
 }
 
 Minesweeper = {
     wipeGame() {
         Minesweeper.board = new Board();
+        $(`#mine-count`).html(``);
     },
 
     newGame(sizeX, sizeY, mineCount) {
         Minesweeper.board.generateTiles(sizeX, sizeY, mineCount);
+        $(`#mine-count`).html(`${Minesweeper.board.countAllMines()} mines`);
     },
 
     handleClick(event) {

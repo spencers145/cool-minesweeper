@@ -13,3 +13,11 @@
 #board {
     border-collapse: collapse;
 }
+
+body {
+    display: flex;
+}
+
+#sidebar {
+    
+}
